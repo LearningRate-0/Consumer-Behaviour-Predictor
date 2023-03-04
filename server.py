@@ -1,4 +1,4 @@
-# from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -11,21 +11,21 @@ from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import math
 
-# app = Flask(__name__)
+app = Flask(__name__)
 
 
 with open('xgboost_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
-# @app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['POST'])
 def predict():
     # file = request.files['file']
     file = 'dataset/test.csv'
     df = preprocess(file)
 
     predictions = model.predict(df)
-
-    return predictions
+    pd.DataFrame(predictions).to_csv('predictions.csv')
+    return send_file('./predictions.csv')
 
 def preprocess(file):
     data = pd.read_csv(file)
@@ -59,5 +59,5 @@ def preprocess(file):
 
 if __name__ == '__main__':
     
-    # app.run()
-    print(predict())
+    app.run()
+    # print(predict())
