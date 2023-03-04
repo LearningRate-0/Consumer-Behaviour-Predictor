@@ -1,8 +1,7 @@
 with open('xgboost_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
-def preprocess(file):
-    data = pd.read_csv(file)
+def preprocess(data):
     #data.drop(["User_ID", "Product_ID"], axis = 1, inplace = True)
     data["Stay_In_Current_City_Years"].replace({'0':0,
                                          '1':1,
@@ -30,19 +29,43 @@ def preprocess(file):
     print(data.shape)
     return data
 
+# Creates a graph and return dictionary of {'graph_name':'image_source'}
 def generate_graph(predictions,file_name):
     # Save predictions to csv file    
-    pd.DataFrame(predictions).to_csv('temp/'+file_name+'.csv')
+    
 
     pass
 
 # input_file is a file object
 def run_csv_model(input_file,output_file_name):
+    # Read csv from file
+    data = pd.read_csv(file)
     # Preprocess data
-    data = preprocess(input_file)
+    processed_data = preprocess(data)
     # Predict
-    pass
+    output_result= model.predict(processed_data)
+    # Append output to data
+    data['Purchase']=output_result
+    pd.DataFrame(data).to_csv('temp/'+output_file_name+'.csv')
 
-def run_single_model(data):
+    result=generate_graph(predictions, output_file_name)
+    result['output_file']='temp/'+output_file_name+'.csv'
+    return result
+    
+# input is a json
+def run_single_model(json_data,output_file_name):
+    data_dict=json.loads(json_data)
+    data=pd.json_normalize(data_dict)
+    # Preprocess data
+    processed_data = preprocess(data)
+    # Predict
+    output_result= model.predict(processed_data)
+    # Append output to data
+    data['Purchase']=output_result
+    pd.DataFrame(data).to_csv('temp/'+output_file_name+'.csv')
+
+    result=generate_graph(predictions, output_file_name)
+    result['output_file']='temp/'+output_file_name+'.csv'
+    return result
     
 

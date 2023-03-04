@@ -18,9 +18,11 @@ app = Flask(__name__)
 def predictSingle():
     # Get data from request
     data = request.get_json()
-    # Preprocess data
-    paths=run_single_model(data)
-    pass
+    # Generate file_name from current time from system in epoch time and random number
+    output_file_name = str(time.time()) + str(random.randint(0, 1000000))
+    # Run model
+    paths=run_single_model(input_file, output_file_name)
+    return jsonify(paths)
 
 
 @app.route('/predict', methods=['POST'])
