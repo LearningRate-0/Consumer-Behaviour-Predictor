@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify, send_file
 import pickle
+import time
+import random
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -14,7 +16,7 @@ from utils import preprocess, model, run_single_model, run_csv_model
 
 app = Flask(__name__)
 
-@app.route('/predict',methods=['POST'])
+@app.route('/predict-single',methods=['POST'])
 def predictSingle():
     # Get data from request
     data = request.get_json()

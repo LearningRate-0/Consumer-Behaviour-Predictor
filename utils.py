@@ -2,6 +2,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import squarify
+import pickle
 
 with open('xgboost_model.pkl', 'rb') as f:
     model = pickle.load(f)
@@ -153,7 +154,7 @@ def generate_graph(predictions,file_name):
 # input_file is a file object
 def run_csv_model(input_file,output_file_name):
     # Read csv from file
-    data = pd.read_csv(file)
+    data = pd.read_csv(input_file)
     # Preprocess data
     processed_data = preprocess(data)
     # Predict
