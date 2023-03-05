@@ -2,19 +2,20 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import squarify
+import pickle
 
 with open('xgboost_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
-def preprocess(data):
-    #data.drop(["User_ID", "Product_ID"], axis = 1, inplace = True)
+def preprocess(data,single):
+    data.drop(["User_ID", "Product_ID"], axis = 1,inplace=True)
     data["Stay_In_Current_City_Years"].replace({'0':0,
                                          '1':1,
                                          '2':4,
                                          '3':3,
-                                         '4+':2},inplace = True)
+                                         '4+':2},inplace=True)
 
-    data["Gender"].replace({'M':1,'F':0},inplace = True)
+    data["Gender"].replace({'M':1,'F':0},inplace=True)
 
     data["Age"].replace({'0-17' :17,
                     '18-25':20,
@@ -22,17 +23,49 @@ def preprocess(data):
                     '36-45':40,
                     '46-50':47,
                     '51-55':52,
-                    '55+' : 56},
-                    inplace = True)
-    
-    data_city_categories = pd.get_dummies(data['City_Category'])
-    data_city_categories = data_city_categories.add_prefix("City_Category_")
-    data = pd.concat([data, data_city_categories], axis=1)
-    data = data.drop(['City_Category'], axis = 1)
+                    '55+' : 56},inplace=True)
+    if(single):
+        #create three new cols with 0s
+        data['City_Category_A'] = 0
+        data['City_Category_B'] = 0
+        data['City_Category_C'] = 0
+
+        #set the appropriate col to 1
+        data.loc[data['City_Category'] == 'A', 'City_Category_A'] = 1
+        data.loc[data['City_Category'] == 'B', 'City_Category_B'] = 1
+        data.loc[data['City_Category'] == 'C', 'City_Category_C'] = 1
+
+        data = data.drop(['City_Category'], axis = 1)
+    else:
+        data_city_categories = pd.get_dummies(data['City_Category'])
+        data_city_categories = data_city_categories.add_prefix("City_Category_")
+        data = pd.concat([data, data_city_categories], axis=1)
+        data = data.drop(['City_Category'], axis = 1)
+
     data['Product_Category_2'] =data['Product_Category_2'].fillna(0)
     data['Product_Category_3'] =data['Product_Category_3'].fillna(0)
     print(data.shape)
+    if single:
+    #change datatype of Product_Category_2 and Product_Category_3 to int
+        data['Product_Category_1'] = data['Product_Category_2'].astype(int)
+        data['Product_Category_2'] = data['Product_Category_2'].astype(int)
+        data['Product_Category_3'] = data['Product_Category_3'].astype(int)
+
+        #occupation
+        data['Occupation'] = data['Occupation'].astype(int)
+        #marital_status
+        data['Marital_Status'] = data['Marital_Status'].astype(int)
     return data
+
+
+def run_single_model(data):
+    preprocessedData = preprocess(data.copy(),True)
+    print("preprocessed")
+    predictions = model.predict(preprocessedData)
+    data["Purchase"] = predictions
+    return data
+
+
 
 def swarm_plot(data_dict,x_label,y_label,title,file_name):
     swarm_df = pd.DataFrame.from_dict(data_dict, orient='index').T
@@ -144,33 +177,17 @@ def generate_graph(predictions,file_name):
 # input_file is a file object
 def run_csv_model(input_file,output_file_name):
     # Read csv from file
-    data = pd.read_csv(file)
+    data = pd.read_csv(input_file)
     # Preprocess data
-    processed_data = preprocess(data)
+    processed_data = preprocess(data.copy(),False)
     # Predict
+    print("preprocessed")
     output_result= model.predict(processed_data)
     # Append output to data
     data['Purchase']=output_result
     pd.DataFrame(data).to_csv('temp/'+output_file_name+'.csv')
 
-    result=generate_graph(predictions, output_file_name)
+    result=generate_graph(data, output_file_name)
     result['output_file']='temp/'+output_file_name+'.csv'
     return result
-    
-# input is a json
-def run_single_model(json_data,output_file_name):
-    data_dict=json.loads(json_data)
-    data=pd.json_normalize(data_dict)
-    # Preprocess data
-    processed_data = preprocess(data)
-    # Predict
-    output_result= model.predict(processed_data)
-    # Append output to data
-    data['Purchase']=output_result
-    pd.DataFrame(data).to_csv('temp/'+output_file_name+'.csv')
-
-    result=generate_graph(predictions, output_file_name)
-    result['output_file']='temp/'+output_file_name+'.csv'
-    return result
-    
-
+   
