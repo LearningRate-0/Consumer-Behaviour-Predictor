@@ -25,11 +25,16 @@ def preprocess(data,single):
                     '51-55':52,
                     '55+' : 56},
                     inplace = True)
-    
-    data_city_categories = pd.get_dummies(data['City_Category'])
-    data_city_categories = data_city_categories.add_prefix("City_Category_")
-    data = pd.concat([data, data_city_categories], axis=1)
-    data = data.drop(['City_Category'], axis = 1)
+    if(single):
+        data['City_Category_A'] = [1 if x == 'A' else 0 for x in data['City_Category']]
+        data['City_Category_B'] = [1 if x == 'B' else 0 for x in data['City_Category']]
+        data['City_Category_C'] = [1 if x == 'C' else 0 for x in data['City_Category']]
+        data = data.drop(['City_Category'], axis = 1)
+    else:
+        data_city_categories = pd.get_dummies(data['City_Category'])
+        data_city_categories = data_city_categories.add_prefix("City_Category_")
+        data = pd.concat([data, data_city_categories], axis=1)
+        data = data.drop(['City_Category'], axis = 1)
 
     data['Product_Category_2'] =data['Product_Category_2'].fillna(0)
     data['Product_Category_3'] =data['Product_Category_3'].fillna(0)
@@ -38,7 +43,7 @@ def preprocess(data,single):
 
 
 def run_single_model(data):
-    preprocessedData = preprocess(data)
+    preprocessedData = preprocess(data,True)
     print(preprocessedData.head())
     predictions = model.predict(preprocessedData)
     data["Purchase"] = predictions
@@ -158,7 +163,7 @@ def run_csv_model(input_file,output_file_name):
     # Read csv from file
     data = pd.read_csv(input_file)
     # Preprocess data
-    processed_data = preprocess(data)
+    processed_data = preprocess(data,False)
     # Predict
     print(processed_data.head())
     output_result= model.predict(processed_data)
