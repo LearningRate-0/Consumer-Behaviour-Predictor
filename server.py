@@ -15,7 +15,10 @@ import math
 import json
 from utils import preprocess, model, run_single_model, run_csv_model
 
-app = Flask(__name__)
+#cors
+from flask_cors import CORS
+app = Flask(__name__, static_url_path="",static_folder=".")
+CORS(app)
 
 @app.route('/predict-single',methods=['POST'])
 def predictSingle():
