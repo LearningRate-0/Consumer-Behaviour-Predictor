@@ -7,7 +7,7 @@ import pickle
 with open('xgboost_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
-def preprocess(data):
+def preprocess(data,single):
     data.drop(["User_ID", "Product_ID"], axis = 1, inplace = True)
     data["Stay_In_Current_City_Years"].replace({'0':0,
                                          '1':1,
@@ -30,6 +30,7 @@ def preprocess(data):
     data_city_categories = data_city_categories.add_prefix("City_Category_")
     data = pd.concat([data, data_city_categories], axis=1)
     data = data.drop(['City_Category'], axis = 1)
+
     data['Product_Category_2'] =data['Product_Category_2'].fillna(0)
     data['Product_Category_3'] =data['Product_Category_3'].fillna(0)
     print(data.shape)
@@ -37,10 +38,11 @@ def preprocess(data):
 
 
 def run_single_model(data):
-
-    data = preprocess(data)
-    predictions = model.predict(data)
-    return predictions
+    preprocessedData = preprocess(data)
+    print(preprocessedData.head())
+    predictions = model.predict(preprocessedData)
+    data["Purchase"] = predictions
+    return data
 
 
 
@@ -167,21 +169,4 @@ def run_csv_model(input_file,output_file_name):
     result=generate_graph(data, output_file_name)
     result['output_file']='temp/'+output_file_name+'.csv'
     return result
-    
-# input is a json
-def run_single_model(json_data,output_file_name):
-    data_dict=json.loads(json_data)
-    data=pd.json_normalize(data_dict)
-    # Preprocess data
-    processed_data = preprocess(data)
-    # Predict
-    output_result= model.predict(processed_data)
-    # Append output to data
-    data['Purchase']=output_result
-    pd.DataFrame(data).to_csv('temp/'+output_file_name+'.csv')
-
-    result=generate_graph(predictions, output_file_name)
-    result['output_file']='temp/'+output_file_name+'.csv'
-    return result
-    
-
+   

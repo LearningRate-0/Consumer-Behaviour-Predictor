@@ -12,6 +12,7 @@ from sklearn.model_selection import train_test_split
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import math
+import json
 from utils import preprocess, model, run_single_model, run_csv_model
 
 app = Flask(__name__)
@@ -19,8 +20,10 @@ app = Flask(__name__)
 @app.route('/predict-single',methods=['POST'])
 def predictSingle():
     # Get data from request
-    data = request.get_json()
-
+    data = request.data
+    data_dict=json.loads(data)
+    data=pd.json_normalize(data_dict)
+    print(data)
     df = pd.DataFrame.from_dict(data)
     # Generate file_name from current time from system in epoch time and random number
     #output_file_name = str(time.time()) + str(random.randint(0, 1000000))
