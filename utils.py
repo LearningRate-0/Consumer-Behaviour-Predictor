@@ -8,7 +8,7 @@ with open('xgboost_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
 def preprocess(data):
-    #data.drop(["User_ID", "Product_ID"], axis = 1, inplace = True)
+    data.drop(["User_ID", "Product_ID"], axis = 1, inplace = True)
     data["Stay_In_Current_City_Years"].replace({'0':0,
                                          '1':1,
                                          '2':4,
@@ -91,7 +91,7 @@ def generate_graph(predictions,file_name):
     city_dict = {'A':[],'B':[],'C':[]}
     age_dict = {}
     stay_In_Current_City_Years_dict = {}
-    gender_dict = {'M':[],'F':[]}
+    gender_dict = {0:[],1:[]}
     marital_status_dict = {0:[],1:[]}
 
     for ind in predictions.index:
@@ -158,12 +158,13 @@ def run_csv_model(input_file,output_file_name):
     # Preprocess data
     processed_data = preprocess(data)
     # Predict
+    print(processed_data.head())
     output_result= model.predict(processed_data)
     # Append output to data
     data['Purchase']=output_result
     pd.DataFrame(data).to_csv('temp/'+output_file_name+'.csv')
 
-    result=generate_graph(predictions, output_file_name)
+    result=generate_graph(data, output_file_name)
     result['output_file']='temp/'+output_file_name+'.csv'
     return result
     
