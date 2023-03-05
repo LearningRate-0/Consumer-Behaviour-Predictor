@@ -34,6 +34,15 @@ def preprocess(data):
     print(data.shape)
     return data
 
+
+def run_single_model(data):
+
+    data = preprocess(data)
+    predictions = model.predict(data)
+    return predictions
+
+
+
 def swarm_plot(data_dict,x_label,y_label,title,file_name):
     swarm_df = pd.DataFrame.from_dict(data_dict, orient='index').T
 
