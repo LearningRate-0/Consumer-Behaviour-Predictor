@@ -8,14 +8,14 @@ with open('xgboost_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
 def preprocess(data,single):
-    data.drop(["User_ID", "Product_ID"], axis = 1, inplace = True)
+    data.drop(["User_ID", "Product_ID"], axis = 1,inplace=True)
     data["Stay_In_Current_City_Years"].replace({'0':0,
                                          '1':1,
                                          '2':4,
                                          '3':3,
-                                         '4+':2},inplace = True)
+                                         '4+':2},inplace=True)
 
-    data["Gender"].replace({'M':1,'F':0},inplace = True)
+    data["Gender"].replace({'M':1,'F':0},inplace=True)
 
     data["Age"].replace({'0-17' :17,
                     '18-25':20,
@@ -23,12 +23,18 @@ def preprocess(data,single):
                     '36-45':40,
                     '46-50':47,
                     '51-55':52,
-                    '55+' : 56},
-                    inplace = True)
+                    '55+' : 56},inplace=True)
     if(single):
-        data['City_Category_A'] = [1 if x == 'A' else 0 for x in data['City_Category']]
-        data['City_Category_B'] = [1 if x == 'B' else 0 for x in data['City_Category']]
-        data['City_Category_C'] = [1 if x == 'C' else 0 for x in data['City_Category']]
+        #create three new cols with 0s
+        data['City_Category_A'] = 0
+        data['City_Category_B'] = 0
+        data['City_Category_C'] = 0
+
+        #set the appropriate col to 1
+        data.loc[data['City_Category'] == 'A', 'City_Category_A'] = 1
+        data.loc[data['City_Category'] == 'B', 'City_Category_B'] = 1
+        data.loc[data['City_Category'] == 'C', 'City_Category_C'] = 1
+
         data = data.drop(['City_Category'], axis = 1)
     else:
         data_city_categories = pd.get_dummies(data['City_Category'])
@@ -39,11 +45,21 @@ def preprocess(data,single):
     data['Product_Category_2'] =data['Product_Category_2'].fillna(0)
     data['Product_Category_3'] =data['Product_Category_3'].fillna(0)
     print(data.shape)
+    if single:
+    #change datatype of Product_Category_2 and Product_Category_3 to int
+        data['Product_Category_1'] = data['Product_Category_2'].astype(int)
+        data['Product_Category_2'] = data['Product_Category_2'].astype(int)
+        data['Product_Category_3'] = data['Product_Category_3'].astype(int)
+
+        #occupation
+        data['Occupation'] = data['Occupation'].astype(int)
+        #marital_status
+        data['Marital_Status'] = data['Marital_Status'].astype(int)
     return data
 
 
 def run_single_model(data):
-    preprocessedData = preprocess(data,True)
+    preprocessedData = preprocess(data.copy(),True)
     print(preprocessedData.head())
     predictions = model.predict(preprocessedData)
     data["Purchase"] = predictions
@@ -163,7 +179,7 @@ def run_csv_model(input_file,output_file_name):
     # Read csv from file
     data = pd.read_csv(input_file)
     # Preprocess data
-    processed_data = preprocess(data,False)
+    processed_data = preprocess(data.copy(),False)
     # Predict
     print(processed_data.head())
     output_result= model.predict(processed_data)
