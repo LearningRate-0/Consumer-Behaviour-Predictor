@@ -60,7 +60,7 @@ def preprocess(data,single):
 
 def run_single_model(data):
     preprocessedData = preprocess(data.copy(),True)
-    print(preprocessedData.head())
+    print("preprocessed")
     predictions = model.predict(preprocessedData)
     data["Purchase"] = predictions
     return data
@@ -114,7 +114,7 @@ def generate_graph(predictions,file_name):
     city_dict = {'A':[],'B':[],'C':[]}
     age_dict = {}
     stay_In_Current_City_Years_dict = {}
-    gender_dict = {0:[],1:[]}
+    gender_dict = {'M':[],'F':[]}
     marital_status_dict = {0:[],1:[]}
 
     for ind in predictions.index:
@@ -181,7 +181,7 @@ def run_csv_model(input_file,output_file_name):
     # Preprocess data
     processed_data = preprocess(data.copy(),False)
     # Predict
-    print(processed_data.head())
+    print("preprocessed")
     output_result= model.predict(processed_data)
     # Append output to data
     data['Purchase']=output_result
