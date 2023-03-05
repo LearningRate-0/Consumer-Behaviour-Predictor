@@ -57,6 +57,11 @@ def treemap_plot(total,file_name,Title):
     plt.savefig(file_name, dpi=300) 
     plt.close()
 
+def pick_top(data_dict):
+    for key in data_dict:
+        data_dict[key].sort()
+        data_dict[key] = data_dict[key][::250]
+    return data_dict
 
 # Creates a graph and return dictionary of {'graph_name':'image_source'}
 def generate_graph(predictions,file_name):
@@ -75,7 +80,7 @@ def generate_graph(predictions,file_name):
     #make a tree map
     city_dict = {'A':[],'B':[],'C':[]}
     age_dict = {}
-    Stay_In_Current_City_Years_dict = {}
+    stay_In_Current_City_Years_dict = {}
     gender_dict = {'M':[],'F':[]}
     marital_status_dict = {0:[],1:[]}
 
@@ -93,30 +98,21 @@ def generate_graph(predictions,file_name):
             age_dict[age].append(predictions['Purchase'][ind])
         else:
             age_dict[age] = [predictions['Purchase'][ind]]
-        if Stay_In_Current_City_Years in Stay_In_Current_City_Years_dict:
-            Stay_In_Current_City_Years_dict[Stay_In_Current_City_Years].append(predictions['Purchase'][ind])
+        if Stay_In_Current_City_Years in stay_In_Current_City_Years_dict:
+            stay_In_Current_City_Years_dict[Stay_In_Current_City_Years].append(predictions['Purchase'][ind])
         else:
-            Stay_In_Current_City_Years_dict[Stay_In_Current_City_Years] = [predictions['Purchase'][ind]]
+            stay_In_Current_City_Years_dict[Stay_In_Current_City_Years] = [predictions['Purchase'][ind]]
 
-    for key in age_dict:
-        age_dict[key].sort()
-        age_dict[key] = age_dict[key][::250]
+    age_dict = pick_top(age_dict)
 
-    for key in Stay_In_Current_City_Years_dict:
-        Stay_In_Current_City_Years_dict[key].sort()
-        Stay_In_Current_City_Years_dict[key] = Stay_In_Current_City_Years_dict[key][::250]
+    stay_In_Current_City_Years_dict = pick_top(stay_In_Current_City_Years_dict)
 
-    for key in city_dict:
-        city_dict[key].sort()
-        city_dict[key] = city_dict[key][::250]
-    
-    for key in marital_status_dict:
-        marital_status_dict[key].sort()
-        marital_status_dict[key] = marital_status_dict[key][::250]
-    
-    for key in gender_dict:
-        gender_dict[key].sort()
-        gender_dict[key] = gender_dict[key][::250]
+    marital_status_dict = pick_top(marital_status_dict)
+
+    city_dict = pick_top(city_dict)
+
+    gender_dict = pick_top(gender_dict)
+
 
     
     file_path = {}
@@ -129,7 +125,7 @@ def generate_graph(predictions,file_name):
 
     #make a swarm plot
     swarm_plot(age_dict,'Age','Purchase','Purchase vs Age',file_path['swarm_age'])
-    swarm_plot(Stay_In_Current_City_Years_dict,'Stay_In_Current_City_Years','Purchase','Purchase vs Stay_In_Current_City_Years',file_path['swarm_Stay_In_Current_City_Years'])
+    swarm_plot(stay_In_Current_City_Years_dict,'Stay_In_Current_City_Years','Purchase','Purchase vs Stay_In_Current_City_Years',file_path['swarm_Stay_In_Current_City_Years'])
     swarm_plot(city_dict,'City_Category','Purchase','Purchase vs City_Category',file_path['swarm_city'])
     swarm_plot(marital_status_dict,'Marital_Status','Purchase','Purchase vs Marital_Status',file_path['swarm_marital_status'])
     swarm_plot(gender_dict,'Gender','Purchase','Gender vs Purchase',file_path['swarm_gender'])
