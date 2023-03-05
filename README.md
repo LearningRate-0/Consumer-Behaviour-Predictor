@@ -5,24 +5,32 @@
 
 </center>
 
-# Table of contents
-
+<!-- TOC start -->
 - [Consumer-Behaviour-Predictor](#consumer-behaviour-predictor)
-  - [Problem Statement](#problem-statement)
-  - [Sub-tasks](#sub-tasks)
-  - [The Design](#the-design)
-  - [Exploratory Data Analysis and Feature Selection](#exploratory-data-analysis-and-feature-selection)
-    - [Count Distribution plots](#count-distribution-plots)
-    - [Density plot](#density-plot)
-  - [Data pre-processing](#data-pre-processing)
-    - [Map to ordinal values](#map-to-ordinal-values)
-    - [One-hot encoding](#one-hot-encoding)
-    - [Mapping v/s One-hot encoding](#mapping-vs-one-hot-encoding)
-  - [Models](#models)
-    - [XGB Regressor](#xgb-regressor)
-    - [Random Forest Regressor](#random-forest-regressor)
-  - [Data splitting](#data-splitting)
-  - [XGB Regressor tuning](#xgb-regressor-tuning)
+  * [Problem Statement](#problem-statement)
+  * [Sub-tasks](#sub-tasks)
+  * [The Design](#the-design)
+  * [Exploratory Data Analysis and Feature Selection](#exploratory-data-analysis-and-feature-selection)
+    + [Count Distribution plots](#count-distribution-plots)
+    + [Density plot](#density-plot)
+  * [Data pre-processing](#data-pre-processing)
+    + [Map to ordinal values](#map-to-ordinal-values)
+    + [One-hot encoding](#one-hot-encoding)
+    + [Mapping v/s One-hot encoding](#mapping-vs-one-hot-encoding)
+  * [Models](#models)
+    + [XGB Regressor](#xgb-regressor)
+    + [Random Forest Regressor](#random-forest-regressor)
+  * [Data splitting ](#data-splitting)
+  * [XGB Regressor tuning](#xgb-regressor-tuning)
+  * [Evaluation metrics](#evaluation-metrics)
+    + [Root Mean Squared Error (RMSE)](#root-mean-squared-error-rmse)
+    + [Mean Absolute Percentage Error (MAPE)](#mean-absolute-percentage-error-mape)
+    + [R-squared (R²) or Coefficient of Determination](#r-squared-r-or-coefficient-of-determination)
+  * [Results](#results)
+  * [Pickling and User-Interface](#pickling-and-user-interface)
+  * [Future Scope](#future-scope)
+<!-- TOC end -->
+<!-- TOC -->
 
 ## Problem Statement
 ABC Private Limited is a retail company seeking to gain insights into their customers' purchase behavior, specifically the purchase amount of various products within different categories. To achieve this, a purchase summary of high volume products for selected customers over the previous month has been provided. The data set comprises of customer demographic information such as age, gender, marital status, city type, and stay-in-current-city, as well as product details including product ID, product category, and the total purchase amount for the previous month. The company aims to build a predictive model that will forecast the purchase amount of customers across various products, enabling them to create personalized offers for customers based on their product preferences.
@@ -60,7 +68,7 @@ The data must be pre-processed before fed as input for training. Here there are 
 - Map to ordinal values
 - One-hot encoding
 ### Map to ordinal values
-This method revolves around replacing a category to a mapped numeric value. One example is mapping Male to 1 and Female to 0 for the ```Gender``` attribute. 
+This method revolves around replacing a category to a mapped numeric value. One example is mapping Male to 1 and Female to 0 for the ```Gender``` attribute. We have sorted the average purchase value for each category and assigned a value on a priority basis.
 ### One-hot encoding
 This involes creating a binary variable for each attribute. Here, we have one-hot encoded ```City_Category```. Each new variable takes on the value 1 if the original variable had that category and 0 otherwise. 
 
@@ -136,6 +144,10 @@ However, it is important to note that a high R-squared does not necessarily mean
 
 As we can see, XGB performed better and we will proceed with that.
 
+## Learning Rate
+![learning](analysis/learning.png)
+The above plot shows the variation of MAE with respect to  learning rate v/s the maximum depth. We can see that the global minima is obtained at ```max_depth``` = 11 and ```learning_rate``` = 0.14.
+
 ## Pickling and User-Interface
 The model is then ```pickled```. Pickling a model refers to the process of serializing a trained machine learning model into a binary format that can be stored as a file on a disk. This file can later be loaded and the model can be used for making predictions without the need to train it again. After pickling, we deployed it on the website so that the user can have an easy to use interface to get the predictions.
 
@@ -143,3 +155,19 @@ The model is then ```pickled```. Pickling a model refers to the process of seria
 - Tune the parameters further to obtain better results
 - Try a different model - neural network models
 - Dynamic visualisation and interactive charts
+
+## Installation and execution 
+Create a virtual environment
+```console
+$ python3 -m venv /path/to/new/virtual/environment
+$ source /path/to/new/virtual/environment/bin/activate
+```
+Install the required libraries and dependencies
+```console
+$ pip install -r requirements.txt
+```
+Run the Flask server
+```console
+$ python3 server.py
+```
+The ```models.ipynb``` notebook can be run using Anaconda IDE. You can install Anaconda via referring to the official website. https://www.anaconda.com/products/distribution
