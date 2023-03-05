@@ -23,13 +23,14 @@ def predictSingle():
     data = request.data
     data_dict=json.loads(data)
     data=pd.json_normalize(data_dict)
-    print(data)
+    # print(data)
     df = pd.DataFrame.from_dict(data)
     # Generate file_name from current time from system in epoch time and random number
     #output_file_name = str(time.time()) + str(random.randint(0, 1000000))
     # Run model
     output_data=run_single_model(df)
-    return jsonify(output_data)
+
+    return jsonify(output_data.to_dict())
 
 
 @app.route('/predict', methods=['POST'])
